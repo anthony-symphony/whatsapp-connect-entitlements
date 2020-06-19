@@ -1,0 +1,2 @@
+# WhatsApp Connect Entitlements
+
