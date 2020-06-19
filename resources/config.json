@@ -1,0 +1,10 @@
+{
+  "sessionAuthHost": "connect.uat.symphony.com",
+  "botPrivateKeyPath":"./rsa/",
+  "botPrivateKeyName": "privateKey.pem",
+  "publicKeyId": "entitlements-app",
+  "proxyURL": "",
+  "proxyUsername": "",
+  "proxyPassword": "",
+  "truststorePath": ""
+}
