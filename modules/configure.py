@@ -51,12 +51,8 @@ class SymConfig:
             else:
                 self.data['sessionAuthHost'] = 'https://'+ data['sessionAuthHost']
 
-
-            if 'botRSAName' in data:
-                self.data['botRSAPath'] = self._fix_relative_path(data, 'botRSAPath', 'botRSAName')
-
-            if 'botPrivateKeyName' in data:
-                self.data['botRSAPath'] = self._fix_relative_path(data, 'botPrivateKeyPath', 'botPrivateKeyName')
+            if 'privateKeyName' in data:
+                self.data['botRSAPath'] = self._fix_relative_path(data, 'privateKeyPath', 'privateKeyName')
 
 
             if 'truststorePath' in data:

@@ -61,7 +61,7 @@ Activate the virtual environment **(optional)**:
 ## Getting Started
 ### 1 - Prepare RSA Key pair
 You will first need to generate a **RSA Public/Private Key Pair**.
-- Send the **Public** key to Symphony team in order to set up 
+- Send the **Public** key to Symphony Support Team in order to set up 
 - Private Key will be required in steps below
 - In return, Symphony team will provide a publicKeyID which you will need to populate in the config.json file below
 
@@ -77,8 +77,8 @@ To run the bot, you will need to configure **config.json** provided in the **res
 
 You also need to update based on the service account created above:
 - sessionAuthHost (please confirm this with Symphony team)
-- botPrivateKeyPath (ends with a trailing "/"))
-- botPrivateKeyName
+- privateKeyPath (ends with a trailing "/"))
+- privateKeyName
 - publicKeyId (please confirm this with Symphony team)
 
 
@@ -86,8 +86,8 @@ Sample:
 
     {
         "sessionAuthHost": "connect.uat.symphony.com",
-        "botPrivateKeyPath":"./rsa/",
-        "botPrivateKeyName": "privateKey.pem",
+        "privateKeyPath":"./rsa/",
+        "privateKeyName": "privateKey.pem",
         "publicKeyId": "entitlements-app",
         "proxyURL": "",
         "proxyUsername": "",

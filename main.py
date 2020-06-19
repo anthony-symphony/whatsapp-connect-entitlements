@@ -111,8 +111,8 @@ def print_curent_user_list(process_result):
             for record in process_result['entitlements']:
                 writer.writerow(
                     {'UserID': record['symphonyId'],
-                     'First Name': record['firstName'],
-                     'Last Name': record['lastName'],
+                     'First Name': record['firstName'] if 'firstName' in record else '',
+                     'Last Name': record['lastName'] if 'lastName' in record else '',
                      'Display Name': record['displayName'],
                      'Entitlement Type': record['entitlementType']})
 
