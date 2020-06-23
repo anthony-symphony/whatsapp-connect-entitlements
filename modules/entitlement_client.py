@@ -11,12 +11,14 @@ class EntitlementClient():
 
 
     def list_entitlements(self):
-        url = '/admin/api/v1/entitlements'
+        #url = '/admin/api/v1/entitlements'
+        url = '/admin/api/v1/customer/entitlements'
         return self.execute_rest_call("GET", url)
 
 
     def add_entitlements(self, user_id):
-        url = '/admin/api/v1/entitlements'
+        #url = '/admin/api/v1/entitlements'
+        url = '/admin/api/v1/customer/entitlements'
 
         body = {
             "entitlementType": "WHATSAPPGROUPS",
@@ -27,13 +29,14 @@ class EntitlementClient():
 
 
     def get_entitlements(self, user_id):
-        url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
-
+        #url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
+        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
         return self.execute_rest_call("GET", url)
 
 
     def delete_entitlements(self, user_id):
-        url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
+        #url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
+        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
 
         return self.execute_rest_call("DELETE", url)
 
