@@ -8,14 +8,17 @@ INPUT_FILE = 'whatsapp_user_entitlements.csv'
 OUTPUT_FILE = 'whatsapp_user_entitlements_output.csv'
 USER_FILE = 'current_user_list.csv'
 
+# Allowed Value - WHATSAPP / WECHAT
+CONNECT_APP = 'WHATSAPP'
+
 def main():
-    print('Python Client runs using RSA authentication')
+    print('Start Processing...')
 
     # RSA Auth flow: pass path to rsa config.json file
     configure = SymConfig('./resources/config.json')
     configure.load_config()
     auth = SymBotRSAAuth(configure)
-    entitlement_client = EntitlementClient(auth, configure)
+    entitlement_client = EntitlementClient(auth, configure, CONNECT_APP)
 
     # Now process CSV file
     # CSV file will have 2 columns - UserID, Action (ADD / REMOVE)
@@ -97,7 +100,7 @@ def main():
 
 def print_curent_user_list(process_result):
 
-    if 'entitlements' in process_result:
+    if len(process_result) > 0:
         with open(USER_FILE, 'w', newline='', encoding='utf-8-sig') as csvfile:
             fieldnames = ['UserID',
                           'First Name',
@@ -108,7 +111,7 @@ def print_curent_user_list(process_result):
 
             writer.writeheader()
 
-            for record in process_result['entitlements']:
+            for record in process_result:
                 writer.writerow(
                     {'UserID': record['symphonyId'],
                      'First Name': record['firstName'] if 'firstName' in record else '',

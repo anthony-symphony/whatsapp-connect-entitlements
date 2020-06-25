@@ -5,15 +5,33 @@ from json.decoder import JSONDecodeError
 
 class EntitlementClient():
 
-    def __init__(self, auth, config):
+    def __init__(self, auth, config, connect_app):
         self.auth = auth
         self.config = config
 
+        if connect_app == 'WHATSAPP':
+            self.entitlementType = 'WHATSAPPGROUPS'
+        elif connect_app == 'WECHAT':
+            self.entitlementType = 'WECHATGROUPS'
 
     def list_entitlements(self):
         #url = '/admin/api/v1/entitlements'
         url = '/admin/api/v1/customer/entitlements'
-        return self.execute_rest_call("GET", url)
+
+        user_list = []
+        output = self.execute_rest_call("GET", url)
+
+        while 'entitlements' in output and len(output['entitlements']) > 0:
+            user_list = user_list + output['entitlements']
+
+            if 'pagination' in output:
+                if 'next' in output['pagination']:
+                    next_url = url + output['pagination']['next']
+                    output = self.execute_rest_call("GET", next_url)
+                else:
+                    output = dict()
+
+        return user_list
 
 
     def add_entitlements(self, user_id):
@@ -21,7 +39,7 @@ class EntitlementClient():
         url = '/admin/api/v1/customer/entitlements'
 
         body = {
-            "entitlementType": "WHATSAPPGROUPS",
+            "entitlementType": self.entitlementType,
             "symphonyId": str(user_id)
         }
 
@@ -30,13 +48,13 @@ class EntitlementClient():
 
     def get_entitlements(self, user_id):
         #url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
-        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
+        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
         return self.execute_rest_call("GET", url)
 
 
     def delete_entitlements(self, user_id):
         #url = f'/admin/api/v1/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
-        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/WHATSAPPGROUPS'
+        url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
 
         return self.execute_rest_call("DELETE", url)
 
