@@ -12,7 +12,7 @@ class EntitlementClient():
         if connect_app == 'WHATSAPP':
             self.entitlementType = 'WHATSAPPGROUPS'
         elif connect_app == 'WECHAT':
-            self.entitlementType = 'WECHATGROUPS'
+            self.entitlementType = 'WECHAT'
 
     def list_entitlements(self):
         #url = '/admin/api/v1/entitlements'

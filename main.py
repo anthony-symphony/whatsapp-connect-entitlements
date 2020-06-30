@@ -9,7 +9,7 @@ OUTPUT_FILE = 'whatsapp_user_entitlements_output.csv'
 USER_FILE = 'current_user_list.csv'
 
 # Allowed Value - WHATSAPP / WECHAT
-CONNECT_APP = 'WHATSAPP'
+CONNECT_APP = 'WECHAT'
 
 def main():
     print('Start Processing...')
