@@ -9,7 +9,7 @@ OUTPUT_FILE = 'whatsapp_user_entitlements_output.csv'
 USER_FILE = 'current_user_list.csv'
 
 # Allowed Value - WHATSAPP / WECHAT
-CONNECT_APP = 'WECHAT'
+CONNECT_APP = 'WHATSAPP'
 
 def main():
     print('Start Processing...')
@@ -60,6 +60,11 @@ def main():
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
                     if 'displayName' in output:
                         result_record['result'] = f'{output["displayName"]} added successfully'
+                    if CONNECT_APP == 'WECHAT':
+                        if 'errorMessage' in output:
+                            result_record['result'] = output['errorMessage']
+                        else:
+                            result_record['result'] = f'User added successfully'
                 except Exception as ex:
                     exInfo = sys.exc_info()
                     print(f" ##### ERROR WHILE ADDING {result_record['user_id']} #####")

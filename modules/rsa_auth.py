@@ -12,23 +12,26 @@ class SymBotRSAAuth():
         self.config = config
 
 
-    def create_jwt(self):
-        """
-        Create a jwt token with payload dictionary. Encode with
-        RSA private key using RS512 algorithm
-
-        :return: A jwt token valid for < 290 seconds
-        """
+    def create_jwt(self, entitlementType):
         with open(self.config.data['botRSAPath'], 'r') as f:
             content = f.readlines()
             private_key = ''.join(content)
             current_date = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
             expiration_date = current_date + (5*58)
-            payload = {
-                'sub': 'ces:customer:' + self.config.data['publicKeyId'],
-                'exp': expiration_date,
-                'iat': current_date
-            }
+
+            if entitlementType == 'WHATSAPPGROUPS':
+                payload = {
+                    'sub': 'ces:customer:' + self.config.data['publicKeyId'],
+                    'exp': expiration_date,
+                    'iat': current_date
+                }
+            elif entitlementType == 'WECHAT':
+                payload = {
+                    'sub': 'ces:customer:' + self.config.data['publicKeyId'] + ':' + self.config.data['podId'],
+                    'exp': expiration_date,
+                    'iat': current_date
+                }
+
             encoded = jwt.encode(payload, private_key, algorithm='RS512')
             f.close()
             return encoded
