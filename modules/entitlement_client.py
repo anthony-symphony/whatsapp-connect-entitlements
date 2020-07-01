@@ -90,7 +90,7 @@ class EntitlementClient():
 
     def execute_rest_call(self, method, path, **kwargs):
         results = None
-        url = self.config.data['sessionAuthHost'] + path
+        url = self.config.data['apiURL'] + path
         session = self.get_session()
         try:
             response = session.request(method, url, **kwargs)

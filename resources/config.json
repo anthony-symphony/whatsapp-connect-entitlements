@@ -1,8 +1,10 @@
 {
-  "sessionAuthHost": "connect.uat.symphony.com",
+  "apiURL": "wcgw-uat.symphony.com",
   "privateKeyPath":"./rsa/",
   "privateKeyName": "privateKey.pem",
-  "publicKeyId": "entitlements-app",
+  "publicKeyId": "psdev-chung-yeoh",
+  "podId": "5119",
+  "entitlementType": "WECHAT",
   "proxyURL": "",
   "proxyUsername": "",
   "proxyPassword": "",

@@ -47,9 +47,9 @@ class SymConfig:
             self.data = data
 
             if 'sessionAuthPort' in data:
-                self.data['sessionAuthHost'] = 'https://'+ data['sessionAuthHost'] + ':' + str(data['sessionAuthPort'])
+                self.data['apiURL'] = 'https://'+ data['apiURL'] + ':' + str(data['sessionAuthPort'])
             else:
-                self.data['sessionAuthHost'] = 'https://'+ data['sessionAuthHost']
+                self.data['apiURL'] = 'https://'+ data['apiURL']
 
             if 'privateKeyName' in data:
                 self.data['botRSAPath'] = self._fix_relative_path(data, 'privateKeyPath', 'privateKeyName')

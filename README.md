@@ -1,13 +1,13 @@
-# WhatsApp Connect Entitlements
+# Symphony WeChat & WhatsApp Connect Entitlements
 
 ## Overview
-This Python script allows you to add / remove users to the Symphony WhatsApp Connect entitlements.
-Users who are added to the WhatsApp Connect entitlements will have access to the Onboarding App which will allow
-he/she to onboard users on WhatsApp.
+This Python script allows you to add / remove users to the Symphony WeChat & WhatsApp Connect entitlements.
+Users who are added to the WeChat & WhatsApp Connect entitlements will have access to the Onboarding App which will allow
+he/she to onboard users on WeChat & WhatsApp.
 
 The script will be able to perform the following:
-- Add user(s) to WhatsApp Connect entitlements
-- Remove user(s) to WhatsApp Connect entitlements
+- Add user(s) to WeChat & WhatsApp Connect entitlements
+- Remove user(s) to WeChat & WhatsApp Connect entitlements
 - Get list of users who currently have the entitlement
 
 The script expects a CSV file as input.
@@ -17,12 +17,12 @@ The input and output file names can be adjusted at the top of the script.
 The user file name will be used to generate the list of all users who currently have the entitlement 
 
     # Input/Output File Names
-    INPUT_FILE = 'whatsapp_user_entitlements.csv'
-    OUTPUT_FILE = 'whatsapp_user_entitlements_output.csv'
+    INPUT_FILE = 'user_entitlements.csv'
+    OUTPUT_FILE = 'user_entitlements_output.csv'
     USER_FILE = 'current_user_list.csv'
 
 ## Input CSV Columns
-The script expects an input CSV file at the top directory where the script runs with filename - ``whatsapp_user_entitlements.csv``
+The script expects an input CSV file at the top directory where the script runs with filename - ``user_entitlements.csv``
 
 The CSV file will contain following columns:
 - UserID (Symphony User ID - e.g ``351775001412105``)
@@ -30,7 +30,7 @@ The CSV file will contain following columns:
 
 
 ## Output CSV Columns
-The output file will be saved in the same directory as the input file with filename - ``whatsapp_user_entitlements_output.csv``
+The output file will be saved in the same directory as the input file with filename - ``user_entitlements_output.csv``
 
 Columns will be same as Input CSV above, with additional of **Status** column.
 
@@ -45,7 +45,7 @@ The CSV file will contain following columns:
 - First Name
 - Last Name
 - Display Name
-- Entitlement Type (always ``WHATSAPPGROUPS`` for now)
+- Entitlement Type (``WHATSAPPGROUPS`` or ``WECHAT`` for now)
 
 
 ## Environment Setup
@@ -76,23 +76,26 @@ To run the bot, you will need to configure **config.json** provided in the **res
 **Notes:**
 
 You also need to update based on the service account created above:
-- sessionAuthHost (please confirm this with Symphony team)
+- apiURL (please confirm this with Symphony team)
 - privateKeyPath (ends with a trailing "/"))
 - privateKeyName
 - publicKeyId (please confirm this with Symphony team)
+- podId (please confirm this with Symphony team)
 
 
 Sample:
 
     {
-        "sessionAuthHost": "connect.uat.symphony.com",
-        "privateKeyPath":"./rsa/",
-        "privateKeyName": "privateKey.pem",
-        "publicKeyId": "entitlements-app",
-        "proxyURL": "",
-        "proxyUsername": "",
-        "proxyPassword": "",
-        "truststorePath": ""
+      "apiURL": "xxx.symphony.com",
+      "privateKeyPath":"./rsa/",
+      "privateKeyName": "privateKey.pem",
+      "publicKeyId": "xxx",
+      "podId": "xxx",
+      "entitlementType": "WECHAT",
+      "proxyURL": "",
+      "proxyUsername": "",
+      "proxyPassword": "",
+      "truststorePath": ""
     }
 
 ### 4 - Run script
