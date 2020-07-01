@@ -81,6 +81,7 @@ You also need to update based on the service account created above:
 - privateKeyName
 - publicKeyId (please confirm this with Symphony team)
 - podId (please confirm this with Symphony team)
+- entitlementType (please set to either ``WECHAT`` or ``WHATSAPP``)
 
 
 Sample:
