@@ -57,6 +57,9 @@ Create a virtual environment by executing the following command **(optional)**:
 Activate the virtual environment **(optional)**:
 ``source ./venv/bin/activate``
 
+Install dependencies required for this client by executing the command below.
+``pip install -r requirements.txt``
+
 
 ## Getting Started
 ### 1 - Prepare RSA Key pair
