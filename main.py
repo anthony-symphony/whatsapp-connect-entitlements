@@ -2,6 +2,7 @@ import csv, sys, traceback
 from modules.rsa_auth import SymBotRSAAuth
 from modules.configure import SymConfig
 from modules.entitlement_client import EntitlementClient
+from modules.pod_user_client import PodUserClient
 
 # Input/Output File Names
 INPUT_FILE = 'whatsapp_user_entitlements.csv'
@@ -18,6 +19,7 @@ def main():
     entitlement_type = configure.data["entitlementType"]
     auth = SymBotRSAAuth(configure)
     entitlement_client = EntitlementClient(auth, configure, entitlement_type)
+    pod_user_client = PodUserClient(configure.data["appId"])
 
     # Now process CSV file
     # CSV file will have 2 columns - UserID, Action (ADD / REMOVE)
@@ -29,10 +31,10 @@ def main():
             if len(row) == 0:
                 continue
 
-            # Ensure CSV has 2 columns
-            if len(row) < 2:
+            # Ensure CSV has 3 columns
+            if len(row) < 3:
                 raise Exception(
-                    'Invalid CSV File Format - Expect 2 columns - UserID, Action')
+                    'Invalid CSV File Format - Expect 2 columns - UserID, Email, Action')
 
             # Skip header row
             if row[0] == "UserID":
@@ -42,13 +44,24 @@ def main():
             # Get row values
             result_record['result'] = ''
             result_record['user_id'] = row[0]
-            result_record['action'] = row[1].upper()
+            result_record['email'] = row[1].lower()
+            result_record['action'] = row[2].upper()
 
             # Check if valid Action
             if result_record['action'] != "ADD" and result_record['action'] != "REMOVE":
                 result_record['result'] = 'Action is not ADD/REMOVE - SKIPPED'
                 process_result.append(result_record)
                 continue
+
+            # If User ID blank, then search by Email
+            if result_record['user_id'] == '' and result_record['email'] != '':
+                result_record['user_id'] = pod_user_client.lookup_user_by_email(result_record['email'])
+
+                if result_record['user_id'] is None:
+                    result_record['result'] = f'ERROR - User ID not found for given email'
+                    process_result.append(result_record)
+                    continue
+
 
             # Add User to Entitlement
             if result_record['action'] == "ADD":
@@ -59,11 +72,25 @@ def main():
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
                     if 'displayName' in output:
                         result_record['result'] = f'{output["displayName"]} added successfully'
+
+                        # Install Connect App if AppId is set
+                        if configure.data["appId"] != '':
+                            print(f"Installing {configure.data['appId']} extension app")
+                            if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
+                                result_record['result'] = f'{output["displayName"]} added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
+
                     if entitlement_type == 'WECHAT':
                         if 'errorMessage' in output:
                             result_record['result'] = output['errorMessage']
                         else:
                             result_record['result'] = f'User added successfully'
+
+                            # Install Connect App if AppId is set
+                            if configure.data["appId"] != '':
+                                print(f"Installing {configure.data['appId']} extension app")
+                                if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
+                                    result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
+
                 except Exception as ex:
                     exInfo = sys.exc_info()
                     print(f" ##### ERROR WHILE ADDING {result_record['user_id']} #####")
@@ -81,6 +108,13 @@ def main():
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
                     else:
                         result_record['result'] = 'Removed successfully'
+
+                        # Remove Connect App if AppId is set
+                        if configure.data["appId"] != '':
+                            print(f"Removing {configure.data['appId']} extension app")
+                            if pod_user_client.remove_connect_app_by_userid(result_record['user_id']):
+                                result_record['result'] = f'User removed from Entitlement. {configure.data["appId"]} extension app removed Successfully!'
+
                 except Exception as ex:
                     exInfo = sys.exc_info()
                     print(f" ##### ERROR WHILE REMOVING {result_record['user_id']} #####")
@@ -129,6 +163,7 @@ def print_curent_user_list(process_result):
 def print_result(process_result):
     with open(OUTPUT_FILE, 'w', newline='', encoding='utf-8-sig') as csvfile:
         fieldnames = ['UserID',
+                      'Email',
                       'Action',
                       'Status']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -137,6 +172,7 @@ def print_result(process_result):
         for row in process_result:
             writer.writerow(
                 {'UserID': row['user_id'],
+                 'Email': row['email'],
                  'Action': row['action'],
                  'Status': row['result']})
 
