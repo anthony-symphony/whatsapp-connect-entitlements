@@ -33,6 +33,9 @@ class EntitlementClient():
                         output = self.execute_rest_call("GET", next_url)
                     else:
                         output = dict()
+                else:
+                    output = dict()
+
         elif self.entitlementType == 'WECHAT':
             user_list = user_list + output
 
