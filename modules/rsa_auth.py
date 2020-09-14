@@ -19,7 +19,7 @@ class SymBotRSAAuth():
             current_date = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
             expiration_date = current_date + (5*58)
 
-            if entitlementType == 'WHATSAPPGROUPS':
+            if entitlementType == 'WHATSAPP':
                 payload = {
                     'sub': 'ces:customer:' + self.config.data['publicKeyId'],
                     'exp': expiration_date,

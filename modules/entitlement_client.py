@@ -10,12 +10,12 @@ class EntitlementClient():
         self.config = config
 
         if connect_app == 'WHATSAPP':
-            self.entitlementType = 'WHATSAPPGROUPS'
+            self.entitlementType = 'WHATSAPP'
         elif connect_app == 'WECHAT':
             self.entitlementType = 'WECHAT'
 
     def list_entitlements(self):
-        if self.entitlementType == 'WHATSAPPGROUPS':
+        if self.entitlementType == 'WHATSAPP':
             url = '/admin/api/v1/customer/entitlements'
         elif self.entitlementType == 'WECHAT':
             url = '/wechatgateway/api/v1/entitlements'
@@ -23,7 +23,7 @@ class EntitlementClient():
         user_list = []
         output = self.execute_rest_call("GET", url)
 
-        if self.entitlementType == 'WHATSAPPGROUPS':
+        if self.entitlementType == 'WHATSAPP':
             while 'entitlements' in output and len(output['entitlements']) > 0:
                 user_list = user_list + output['entitlements']
 
@@ -43,7 +43,7 @@ class EntitlementClient():
 
 
     def add_entitlements(self, user_id):
-        if self.entitlementType == 'WHATSAPPGROUPS':
+        if self.entitlementType == 'WHATSAPP':
             url = '/admin/api/v1/customer/entitlements'
         elif self.entitlementType == 'WECHAT':
             url = '/wechatgateway/api/v1/entitlements'
@@ -57,7 +57,7 @@ class EntitlementClient():
 
 
     def get_entitlements(self, user_id):
-        if self.entitlementType == 'WHATSAPPGROUPS':
+        if self.entitlementType == 'WHATSAPP':
             url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
         elif self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
@@ -66,7 +66,7 @@ class EntitlementClient():
 
 
     def delete_entitlements(self, user_id):
-        if self.entitlementType == 'WHATSAPPGROUPS':
+        if self.entitlementType == 'WHATSAPP':
             url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
         elif self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'

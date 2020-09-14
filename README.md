@@ -49,7 +49,7 @@ The CSV file will contain following columns:
 - First Name
 - Last Name
 - Display Name
-- Entitlement Type (``WHATSAPPGROUPS`` or ``WECHAT`` for now)
+- Entitlement Type (``WHATSAPP`` or ``WECHAT`` for now)
 
 
 ## Environment Setup
