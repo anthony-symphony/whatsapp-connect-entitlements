@@ -48,10 +48,18 @@ class EntitlementClient():
         elif self.entitlementType == 'WECHAT':
             url = '/wechatgateway/api/v1/entitlements'
 
-        body = {
-            "entitlementType": self.entitlementType,
-            "symphonyId": str(user_id)
-        }
+        if self.entitlementType == 'WHATSAPP':
+            body = {
+                "entitlementType": self.entitlementType,
+                "symphonyId": str(user_id)
+            }
+        elif self.entitlementType == 'WECHAT':
+            body = {
+                "entitlementType": self.entitlementType,
+                "symphonyId": str(user_id),
+                "features": ["ROOM"]
+            }
+
 
         return self.execute_rest_call("POST", url, json=body)
 
