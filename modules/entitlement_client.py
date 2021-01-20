@@ -1,5 +1,6 @@
 import requests
 import json
+import urllib.parse
 from json.decoder import JSONDecodeError
 
 
@@ -8,6 +9,7 @@ class EntitlementClient():
     def __init__(self, auth, config, connect_app):
         self.auth = auth
         self.config = config
+        self.jwt = None
 
         if connect_app == 'WHATSAPP':
             self.entitlementType = 'WHATSAPP'
@@ -18,17 +20,17 @@ class EntitlementClient():
         if self.entitlementType == 'WHATSAPP':
             url = '/admin/api/v1/customer/entitlements'
         elif self.entitlementType == 'WECHAT':
-            url = '/wechatgateway/api/v1/entitlements'
+            url = f'/wechatgateway/api/v1/customer/entitlements/externalNetwork/{self.entitlementType}/advisors'
 
         user_list = []
         output = self.execute_rest_call("GET", url)
 
-        if self.entitlementType == 'WHATSAPP':
+        if self.entitlementType in ('WHATSAPP','WECHAT'):
             while 'entitlements' in output and len(output['entitlements']) > 0:
                 user_list = user_list + output['entitlements']
 
                 if 'pagination' in output:
-                    if 'next' in output['pagination']:
+                    if 'next' in output['pagination'] and output['pagination']['next'] is not None :
                         next_url = url + output['pagination']['next']
                         output = self.execute_rest_call("GET", next_url)
                     else:
@@ -36,8 +38,8 @@ class EntitlementClient():
                 else:
                     output = dict()
 
-        elif self.entitlementType == 'WECHAT':
-            user_list = user_list + output
+        # elif self.entitlementType == 'WECHAT':
+        #     user_list = user_list + output
 
         return user_list
 
@@ -46,7 +48,7 @@ class EntitlementClient():
         if self.entitlementType == 'WHATSAPP':
             url = '/admin/api/v1/customer/entitlements'
         elif self.entitlementType == 'WECHAT':
-            url = '/wechatgateway/api/v1/entitlements'
+            url = '/wechatgateway/api/v2/customer/entitlements'
 
         if self.entitlementType == 'WHATSAPP':
             body = {
@@ -55,11 +57,27 @@ class EntitlementClient():
             }
         elif self.entitlementType == 'WECHAT':
             body = {
-                "entitlementType": self.entitlementType,
-                "symphonyId": str(user_id),
-                "features": ["ROOM"]
+                "externalNetwork": self.entitlementType,
+                "symphonyId": str(user_id)
             }
 
+
+        return self.execute_rest_call("POST", url, json=body)
+
+
+    def add_room_permission(self, advisorEmailAddress):
+        if self.entitlementType == 'WHATSAPP':
+            return
+            #url = '/admin/api/v1/customer/entitlements'
+        elif self.entitlementType == 'WECHAT':
+            url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{urllib.parse.quote_plus(advisorEmailAddress)}/externalNetwork/{self.entitlementType}/permissions'
+
+            if self.entitlementType == 'WECHAT':
+                body = {
+                    "advisorEmailAddress": [advisorEmailAddress],
+                    "externalNetwork": self.entitlementType,
+                    "permissionName": "create:room"
+                }
 
         return self.execute_rest_call("POST", url, json=body)
 
@@ -68,7 +86,7 @@ class EntitlementClient():
         if self.entitlementType == 'WHATSAPP':
             url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
         elif self.entitlementType == 'WECHAT':
-            url = f'/wechatgateway/api/v1/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
+            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
 
         return self.execute_rest_call("GET", url)
 
@@ -77,16 +95,27 @@ class EntitlementClient():
         if self.entitlementType == 'WHATSAPP':
             url = f'/admin/api/v1/customer/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
         elif self.entitlementType == 'WECHAT':
-            url = f'/wechatgateway/api/v1/entitlements/{str(user_id)}/entitlementType/{self.entitlementType}'
+            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
 
         return self.execute_rest_call("DELETE", url)
 
 
+    def get_advisor_permissions(self, advisorEmailAddress):
+        url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{urllib.parse.quote_plus(advisorEmailAddress)}/externalNetwork/{self.entitlementType}/permissions'
+        return self.execute_rest_call("GET", url)
+
+
     def get_session(self):
         session = requests.Session()
+
+        if self.jwt is not None:
+            jwt = self.jwt
+        else:
+            jwt = self.auth.create_jwt(self.entitlementType)
+
         session.headers.update({
             'Content-Type': "application/json",
-            'Authorization': "Bearer " + self.auth.create_jwt(self.entitlementType)}
+            'Authorization': "Bearer " + jwt}
         )
 
         session.proxies.update(self.config.data['proxyRequestObject'])
@@ -112,6 +141,11 @@ class EntitlementClient():
 
         if response.status_code == 204:
             results = []
+        # JWT Expired - Generate new one
+        elif response.status_code == 401:
+            print("JWT Expired - Reauthenticating...")
+            self.jwt = None
+            return self.execute_rest_call(method, path, **kwargs)
         elif response.status_code in (200, 409, 201, 404, 400):
             try:
                 results = json.loads(response.text)

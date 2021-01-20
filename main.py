@@ -83,13 +83,28 @@ def main():
                         if 'errorMessage' in output:
                             result_record['result'] = output['errorMessage']
                         else:
-                            result_record['result'] = f'User added successfully'
+                            # if successful, get the user email
+                            if 'emailAddress' in output and output['emailAddress'] is not None:
+                                result_record['email'] = output['emailAddress']
+                            else:
+                                result_record['result'] = 'Missing Email Address - Unable to add room permission'
 
-                            # Install Connect App if AppId is set
-                            if configure.data["appId"] != '':
-                                print(f"Installing {configure.data['appId']} extension app")
-                                if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
-                                    result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
+                            # Add Room Permission
+                            if result_record['email'] is not None and result_record['email'] != '':
+                                output = entitlement_client.add_room_permission(result_record['email'])
+                                if 'permission' in output:
+                                    result_record['result'] = f'User added successfully'
+
+                                    # Install Connect App if AppId is set
+                                    if configure.data["appId"] != '':
+                                        print(f"Installing {configure.data['appId']} extension app")
+                                        if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
+                                            result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
+
+                                elif 'status' in output and 'title' in output:
+                                    result_record['result'] = f'{output["status"]} - {output["title"]}'
+                                else:
+                                    result_record['result'] = f'ERROR - Fail to add room permission'
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
@@ -144,7 +159,7 @@ def print_curent_user_list(process_result):
                           'First Name',
                           'Last Name',
                           'Display Name',
-                          'Entitlement Type']
+                          'External Network']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
@@ -155,7 +170,7 @@ def print_curent_user_list(process_result):
                      'First Name': record['firstName'] if 'firstName' in record else '',
                      'Last Name': record['lastName'] if 'lastName' in record else '',
                      'Display Name': record['displayName'],
-                     'Entitlement Type': record['entitlementType']})
+                     'External Network': record['externalNetwork']})
 
     return
 
