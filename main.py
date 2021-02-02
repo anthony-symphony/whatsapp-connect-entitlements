@@ -70,41 +70,33 @@ def main():
                     output = entitlement_client.add_entitlements(result_record['user_id'])
                     if 'status' in output and 'title' in output:
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
-                    if 'displayName' in output:
-                        result_record['result'] = f'{output["displayName"]} added successfully'
 
-                        # Install Connect App if AppId is set
-                        if configure.data["appId"] != '':
-                            print(f"Installing {configure.data['appId']} extension app")
-                            if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
-                                result_record['result'] = f'{output["displayName"]} added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
-
-                    if entitlement_type == 'WECHAT':
-                        if 'errorMessage' in output:
-                            result_record['result'] = output['errorMessage']
+                    if 'errorMessage' in output:
+                        result_record['result'] = output['errorMessage']
+                    else:
+                        # if successful, get the user email
+                        if 'emailAddress' in output and output['emailAddress'] is not None:
+                            result_record['email'] = output['emailAddress']
                         else:
-                            # if successful, get the user email
-                            if 'emailAddress' in output and output['emailAddress'] is not None:
-                                result_record['email'] = output['emailAddress']
+                            result_record['result'] = 'Missing Email Address - Unable to add room permission'
+
+                        # Add Room Permission
+                        if result_record['email'] is not None and result_record['email'] != '':
+                            print(f"Adding create room permission")
+                            output = entitlement_client.add_room_permission(result_record['email'])
+                            if 'permission' in output:
+                                result_record['result'] = f'User added successfully'
+
+                                # Install Connect App if AppId is set
+                                if configure.data["appId"] != '':
+                                    print(f"Installing {configure.data['appId']} extension app")
+                                    if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
+                                        result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
+
+                            elif 'status' in output and 'title' in output:
+                                result_record['result'] = f'{output["status"]} - {output["title"]}'
                             else:
-                                result_record['result'] = 'Missing Email Address - Unable to add room permission'
-
-                            # Add Room Permission
-                            if result_record['email'] is not None and result_record['email'] != '':
-                                output = entitlement_client.add_room_permission(result_record['email'])
-                                if 'permission' in output:
-                                    result_record['result'] = f'User added successfully'
-
-                                    # Install Connect App if AppId is set
-                                    if configure.data["appId"] != '':
-                                        print(f"Installing {configure.data['appId']} extension app")
-                                        if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
-                                            result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
-
-                                elif 'status' in output and 'title' in output:
-                                    result_record['result'] = f'{output["status"]} - {output["title"]}'
-                                else:
-                                    result_record['result'] = f'ERROR - Fail to add room permission'
+                                result_record['result'] = f'ERROR - Fail to add room permission'
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
