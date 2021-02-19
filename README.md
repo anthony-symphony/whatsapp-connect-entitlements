@@ -6,9 +6,9 @@ Users who are added to the WeChat & WhatsApp Connect entitlements will have acce
 he/she to onboard users on WeChat & WhatsApp.
 
 The script will be able to perform the following:
-- Lookup user(s) Symphony UserID based on given email address
 - Add user(s) to WeChat & WhatsApp Connect entitlements
 - Install WeChat / WhatsApp Connect Extension App to User profile
+- Add list of permissions for a given user(s)
 - Remove user(s) to WeChat & WhatsApp Connect entitlements
 - Remove WeChat / WhatsApp Connect Extension App from User profile
 - Get list of users who currently have the entitlement
@@ -28,9 +28,15 @@ The user file name will be used to generate the list of all users who currently 
 The script expects an input CSV file at the top directory where the script runs with filename - ``user_entitlements.csv``
 
 The CSV file will contain following columns:
-- UserID (Symphony User ID - e.g ``351775001412105`` - Optional if email address is provided)
-- Email (Symphony User Email Address - will be used to lookup UserID from Symphony Pod - Ignored if UserID is not blank)
+- Email (Symphony User Email Address - will be used to lookup from Symphony Directory)
 - Action (Whether to add or remove user to the entitlement - values: ``ADD`` or ``REMOVE``)
+- Permissions (List of permissions to be added - separated by ``~``)
+
+Example input CSV file
+
+    Email,Action,Permissions
+    john.doe@symphony.com,ADD,create:room~create:contact
+    peter.smith@symphony.com,ADD,create:room~create:contact
 
 
 ## Output CSV Columns
@@ -49,7 +55,7 @@ The CSV file will contain following columns:
 - First Name
 - Last Name
 - Display Name
-- Entitlement Type (``WHATSAPP`` or ``WECHAT`` for now)
+- External Network (``WHATSAPP`` or ``WECHAT`` for now)
 
 
 ## Environment Setup

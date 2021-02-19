@@ -1,4 +1,3 @@
-UserID,Email,Action
-351775001412105,,ADD
-
-
+Email,Action,Permissions
+alex.nalin@symphony.com,ADD,create:room~create:contact
+pf.vilquin@symphony.com,ADD,create:room~create:contact

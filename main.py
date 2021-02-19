@@ -22,7 +22,7 @@ def main():
     pod_user_client = PodUserClient(configure.data["appId"])
 
     # Now process CSV file
-    # CSV file will have 2 columns - UserID, Action (ADD / REMOVE)
+    # CSV file will have 2 columns - Email, Action, Permission (ADD / REMOVE)
     process_result = []
     with open(INPUT_FILE, newline='') as csvfile:
         csv_list = csv.reader(csvfile, delimiter=',')
@@ -32,105 +32,118 @@ def main():
                 continue
 
             # Ensure CSV has 3 columns
-            if len(row) < 3:
+            if len(row) !=3 :
                 raise Exception(
-                    'Invalid CSV File Format - Expect 2 columns - UserID, Email, Action')
+                    'Invalid CSV File Format - Expect 3 columns - Email, Action, Permissions')
 
             # Skip header row
-            if row[0] == "UserID":
+            if row[0] == "Email":
                 continue
 
             result_record = dict()
             # Get row values
             result_record['result'] = ''
-            result_record['user_id'] = row[0]
-            result_record['email'] = row[1].lower()
-            result_record['action'] = row[2].upper()
+            result_record['email'] = row[0].lower()
+            result_record['ent_action'] = row[1].upper()
+            result_record['permission'] = row[2]
 
-            # Check if valid Action
-            if result_record['action'] != "ADD" and result_record['action'] != "REMOVE":
-                result_record['result'] = 'Action is not ADD/REMOVE - SKIPPED'
+            # Check if valid Entitlement Action
+            if result_record['ent_action'] not in ("ADD", "REMOVE", ""):
+                result_record['result'] = 'ERROR - Invalid Entitlement Action - SKIPPED'
                 process_result.append(result_record)
                 continue
 
-            # If User ID blank, then search by Email
-            if result_record['user_id'] == '' and result_record['email'] != '':
-                result_record['user_id'] = pod_user_client.lookup_user_by_email(result_record['email'])
-
-                if result_record['user_id'] is None:
-                    result_record['result'] = f'ERROR - User ID not found for given email'
-                    process_result.append(result_record)
-                    continue
+            # If Email is blank, then SKIP
+            if result_record['email'] is None or result_record['email'] == '':
+                result_record['result'] = f'ERROR - Email field is not populated - SKIPPED'
+                process_result.append(result_record)
+                continue
 
 
             # Add User to Entitlement
-            if result_record['action'] == "ADD":
-                print(f"Adding {result_record['user_id']}")
+            if result_record['ent_action'] == "ADD":
+                print(f"Adding {result_record['email']}")
                 try:
-                    output = entitlement_client.add_entitlements(result_record['user_id'])
+                    output = entitlement_client.add_entitlements(result_record['email'])
                     if 'status' in output and 'title' in output:
-                        result_record['result'] = f'{output["status"]} - {output["title"]}'
-
-                    if 'errorMessage' in output:
-                        result_record['result'] = output['errorMessage']
+                        result_record['result'] = f'{output["status"]} - {output["title"]} '
                     else:
-                        # if successful, get the user email
-                        if 'emailAddress' in output and output['emailAddress'] is not None:
-                            result_record['email'] = output['emailAddress']
-                        else:
-                            result_record['result'] = 'Missing Email Address - Unable to add room permission'
+                        result_record['result'] = 'User added to Entitlement. '
 
-                        # Add Room Permission
-                        if result_record['email'] is not None and result_record['email'] != '':
-                            print(f"Adding create room permission")
-                            output = entitlement_client.add_room_permission(result_record['email'])
-                            if 'permission' in output:
-                                result_record['result'] = f'User added successfully'
+                        if 'advisorSymphonyId' in output:
+                            user_id = output['advisorSymphonyId']
+                        if 'symphonyId' in output:
+                            user_id = output['symphonyId']
 
-                                # Install Connect App if AppId is set
-                                if configure.data["appId"] != '':
-                                    print(f"Installing {configure.data['appId']} extension app")
-                                    if pod_user_client.install_connect_app_by_userid(result_record['user_id']):
-                                        result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
-
-                            elif 'status' in output and 'title' in output:
-                                result_record['result'] = f'{output["status"]} - {output["title"]}'
-                            else:
-                                result_record['result'] = f'ERROR - Fail to add room permission'
+                        # Install Connect App if AppId is set
+                        if configure.data["appId"] != '' and user_id != '':
+                            print(f"Installing {configure.data['appId']} extension app")
+                            if pod_user_client.install_connect_app_by_userid(user_id):
+                                result_record['result'] = f'User added to Entitlement. {configure.data["appId"]} extension app installed Successfully!'
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
-                    print(f" ##### ERROR WHILE ADDING {result_record['user_id']} #####")
+                    print(f" ##### ERROR WHILE ADDING ENTITLEMENT {result_record['email']} #####")
                     print('Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
-                    result_record['result'] = 'ERROR ADDING - Check logs for details'
-                    process_result.append(result_record)
-                    continue
+                    result_record['result'] = 'ERROR ADDING Entitlement - Check logs for details'
+
+
+                # Add Permissions
+                if result_record['permission'] is not None and result_record['permission'] != '':
+                    print(f"Parsing Permissions")
+                    permission_list = result_record['permission'].split("~")
+
+                    if permission_list is not None and len(permission_list) > 0:
+                        for p in permission_list:
+                            print(f"Adding Permission - {p}")
+                            try:
+                                output = entitlement_client.add_permission(result_record['email'], p)
+                                if 'permission' in output:
+                                    result_record['result'] += f'Permission {p} added successfully '
+                                elif 'status' in output and 'title' in output:
+                                    result_record['result'] += f'{output["status"]} - {output["title"]} '
+                                else:
+                                    result_record['result'] += f'ERROR - Fail to add permission {p} '
+
+                            except Exception as ex:
+                                exInfo = sys.exc_info()
+                                print(f" ##### ERROR WHILE ADDING PERMISSION {p} for {result_record['email']} #####")
+                                print(
+                                    'Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
+                                result_record['result'] += f'ERROR ADDING PERMISSION {p} - Check logs for details '
 
             # Remove User to Entitlement
-            if result_record['action'] == "REMOVE":
-                print(f"Removing {result_record['user_id']}")
+            if result_record['ent_action'] == "REMOVE":
+                print(f"Removing Entitlement - {result_record['email']}")
                 try:
-                    output = entitlement_client.delete_entitlements(result_record['user_id'])
+                    # Get User ID
+                    if configure.data["appId"] != '':
+                        output = entitlement_client.find_entitlement(result_record['email'])
+                        if 'advisorSymphonyId' in output:
+                            user_id = output['advisorSymphonyId']
+                        if 'symphonyId' in output:
+                            user_id = output['symphonyId']
+
+                    # Remove Entitlement
+                    output = entitlement_client.delete_entitlements(result_record['email'])
                     if 'status' in output and 'title' in output:
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
                     else:
-                        result_record['result'] = 'Removed successfully'
+                        result_record['result'] = 'Entitlement Removed successfully'
 
                         # Remove Connect App if AppId is set
-                        if configure.data["appId"] != '':
+                        if configure.data["appId"] != '' and user_id is not None:
                             print(f"Removing {configure.data['appId']} extension app")
-                            if pod_user_client.remove_connect_app_by_userid(result_record['user_id']):
+                            if pod_user_client.remove_connect_app_by_userid(user_id):
                                 result_record['result'] = f'User removed from Entitlement. {configure.data["appId"]} extension app removed Successfully!'
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
-                    print(f" ##### ERROR WHILE REMOVING {result_record['user_id']} #####")
+                    print(f" ##### ERROR WHILE REMOVING {result_record['email']} #####")
                     print('Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
-                    result_record['result'] = 'ERROR REMOVING - Check logs for details'
-                    process_result.append(result_record)
-                    continue
+                    result_record['result'] = 'ERROR REMOVING Entitlement - Check logs for details'
 
-            # Everything done successfully
+            # Append Result
             process_result.append(result_record)
 
     # Print final result
@@ -169,18 +182,18 @@ def print_curent_user_list(process_result):
 
 def print_result(process_result):
     with open(OUTPUT_FILE, 'w', newline='', encoding='utf-8-sig') as csvfile:
-        fieldnames = ['UserID',
-                      'Email',
+        fieldnames = ['Email',
                       'Action',
+                      'Permissions',
                       'Status']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for row in process_result:
             writer.writerow(
-                {'UserID': row['user_id'],
-                 'Email': row['email'],
-                 'Action': row['action'],
+                {'Email': row['email'],
+                 'Action': row['ent_action'],
+                 'Permissions': row['permission'],
                  'Status': row['result']})
 
     return

@@ -39,7 +39,25 @@ class EntitlementClient():
         return user_list
 
 
-    def add_entitlements(self, user_id):
+    def list_permissions_by_advisor(self, user_email):
+        if self.entitlementType == 'WHATSAPP':
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+        elif self.entitlementType == 'WECHAT':
+            url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+
+        return self.execute_rest_call("GET", url)
+
+
+    def find_entitlement(self, user_email):
+        if self.entitlementType == 'WHATSAPP':
+            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+        elif self.entitlementType == 'WECHAT':
+            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+
+        return self.execute_rest_call("GET", url)
+
+
+    def add_entitlements(self, user_email):
         if self.entitlementType == 'WHATSAPP':
             url = '/admin/api/v2/customer/entitlements'
         elif self.entitlementType == 'WECHAT':
@@ -47,43 +65,43 @@ class EntitlementClient():
 
         body = {
             "externalNetwork": self.entitlementType,
-            "symphonyId": str(user_id)
+            "advisorEmailAddress": user_email
         }
 
         return self.execute_rest_call("POST", url, json=body)
 
 
-    def add_room_permission(self, user_email):
+    def delete_entitlements(self, user_email):
         if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v1/customer/advisors/emailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+        elif self.entitlementType == 'WECHAT':
+            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+
+        return self.execute_rest_call("DELETE", url)
+
+
+    def add_permission(self, user_email, permissionName):
+        if self.entitlementType == 'WHATSAPP':
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
         elif self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
 
         body = {
             "advisorEmailAddress": [user_email],
             "externalNetwork": self.entitlementType,
-            "permissionName": "create:room"
+            "permissionName": permissionName
         }
 
         return self.execute_rest_call("POST", url, json=body)
 
 
-    def get_entitlements(self, user_id):
+    def list_advisor_permission(self, user_email):
         if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
         elif self.entitlementType == 'WECHAT':
-            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
+            url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
 
         return self.execute_rest_call("GET", url)
-
-
-    def delete_entitlements(self, user_id):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
-        elif self.entitlementType == 'WECHAT':
-            url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorSymphonyId={user_id}&externalNetwork={self.entitlementType}'
-
-        return self.execute_rest_call("DELETE", url)
 
 
     def get_session(self):
