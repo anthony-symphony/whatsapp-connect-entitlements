@@ -1,16 +1,16 @@
-# Symphony WeChat & WhatsApp Connect Entitlements
+# Symphony Connect Entitlements
 
 ## Overview
-This Python script allows you to add / remove users to the Symphony WeChat & WhatsApp Connect entitlements.
-Users who are added to the WeChat & WhatsApp Connect entitlements will have access to the Onboarding App which will allow
-he/she to onboard users on WeChat & WhatsApp.
+This Python script allows you to add / remove users to the Symphony WeChat / WhatsApp / SMS Connect entitlements.
+Users who are added to the WeChat / WhatsApp / SMS Connect entitlements will have access to the Onboarding App which will allow
+he/she to onboard users on WeChat / WhatsApp / SMS.
 
 The script will be able to perform the following:
-- Add user(s) to WeChat & WhatsApp Connect entitlements
+- Add user(s) to WeChat / WhatsApp / SMS Connect entitlements
 - Install WeChat / WhatsApp Connect Extension App to User profile
 - Add list of permissions for a given user(s)
-- Remove user(s) to WeChat & WhatsApp Connect entitlements
-- Remove WeChat / WhatsApp Connect Extension App from User profile
+- Remove user(s) to WeChat / WhatsApp / SMS Connect entitlements
+- Remove WeChat / WhatsApp / SMS Connect Extension App from User profile
 - Get list of users who currently have the entitlement
 
 The script expects a CSV file as input.
@@ -55,7 +55,7 @@ The CSV file will contain following columns:
 - First Name
 - Last Name
 - Display Name
-- External Network (``WHATSAPP`` or ``WECHAT`` for now)
+- External Network (``WHATSAPP`` or ``WECHAT`` or ``SMS`` for now)
 
 
 ## Environment Setup
@@ -101,8 +101,8 @@ You also need to update based on the service account created above:
 - privateKeyName
 - publicKeyId (please confirm this with Symphony team)
 - podId (please confirm this with Symphony team)
-- entitlementType (please set to either ``WECHAT`` or ``WHATSAPP``)
-- appId (please set to either ``wechat`` or ``com.symphony.sfs.admin-app`` for WhatsApp, leave blank if you wish to manage extension app manually)
+- entitlementType (please set to either ``WHATSAPP`` or ``WECHAT`` or ``SMS``)
+- appId (please set to either ``wechat`` or ``com.symphony.sfs.admin-app`` for WhatsApp / SMS, leave blank if you wish to manage extension app manually)
 
 
 Sample:

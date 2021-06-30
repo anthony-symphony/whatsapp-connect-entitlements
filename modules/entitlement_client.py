@@ -9,17 +9,14 @@ class EntitlementClient():
         self.auth = auth
         self.config = config
         self.jwt = None
+        self.entitlementType = connect_app
 
-        if connect_app == 'WHATSAPP':
-            self.entitlementType = 'WHATSAPP'
-        elif connect_app == 'WECHAT':
-            self.entitlementType = 'WECHAT'
 
     def list_entitlements(self):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v1/customer/entitlements/externalNetwork/{self.entitlementType}/advisors'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/customer/entitlements/externalNetwork/{self.entitlementType}/advisors'
+        else:
+            url = f'/admin/api/v1/customer/entitlements/externalNetwork/{self.entitlementType}/advisors'
 
         user_list = []
         output = self.execute_rest_call("GET", url)
@@ -38,30 +35,37 @@ class EntitlementClient():
 
         return user_list
 
+    def list_all_permissions(self):
+        if self.entitlementType == 'WECHAT':
+            url = f'/wechatgateway/api/v1/customer/permissions'
+        else:
+            url = f'/admin/api/v1/customer/permissions'
+
+        return self.execute_rest_call("GET", url)
 
     def list_permissions_by_advisor(self, user_email):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+        else:
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
 
         return self.execute_rest_call("GET", url)
 
 
     def find_entitlement(self, user_email):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+        else:
+            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
 
         return self.execute_rest_call("GET", url)
 
 
     def add_entitlements(self, user_email):
-        if self.entitlementType == 'WHATSAPP':
-            url = '/admin/api/v2/customer/entitlements'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = '/wechatgateway/api/v2/customer/entitlements'
+        else:
+            url = '/admin/api/v2/customer/entitlements'
 
         body = {
             "externalNetwork": self.entitlementType,
@@ -72,19 +76,19 @@ class EntitlementClient():
 
 
     def delete_entitlements(self, user_email):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
+        else:
+            url = f'/admin/api/v2/customer/advisor/entitlements?advisorEmailAddress={user_email}&externalNetwork={self.entitlementType}'
 
         return self.execute_rest_call("DELETE", url)
 
 
     def add_permission(self, user_email, permissionName):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+        else:
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
 
         body = {
             "advisorEmailAddress": [user_email],
@@ -96,10 +100,10 @@ class EntitlementClient():
 
 
     def list_advisor_permission(self, user_email):
-        if self.entitlementType == 'WHATSAPP':
-            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
-        elif self.entitlementType == 'WECHAT':
+        if self.entitlementType == 'WECHAT':
             url = f'/wechatgateway/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
+        else:
+            url = f'/admin/api/v1/customer/advisors/advisorEmailAddress/{user_email}/externalNetwork/{self.entitlementType}/permissions'
 
         return self.execute_rest_call("GET", url)
 

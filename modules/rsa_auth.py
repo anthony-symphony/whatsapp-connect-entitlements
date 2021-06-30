@@ -19,18 +19,19 @@ class SymBotRSAAuth():
             current_date = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
             expiration_date = current_date + (5*58)
 
-            if entitlementType == 'WHATSAPP':
-                payload = {
-                    'sub': 'ces:customer:' + self.config.data['publicKeyId'],
-                    'exp': expiration_date,
-                    'iat': current_date
-                }
-            elif entitlementType == 'WECHAT':
+            if entitlementType == 'WECHAT':
                 payload = {
                     'sub': 'ces:customer:' + self.config.data['publicKeyId'] + ':' + self.config.data['podId'],
                     'exp': expiration_date,
                     'iat': current_date
                 }
+            else:
+                payload = {
+                    'sub': 'ces:customer:' + self.config.data['publicKeyId'],
+                    'exp': expiration_date,
+                    'iat': current_date
+                }
+
 
             encoded = jwt.encode(payload, private_key, algorithm='RS512')
             f.close()
