@@ -19,7 +19,10 @@ def main():
     entitlement_type = configure.data["entitlementType"]
     auth = SymBotRSAAuth(configure)
     entitlement_client = EntitlementClient(auth, configure, entitlement_type)
-    pod_user_client = PodUserClient(configure.data["appId"])
+    if configure.data["appId"] != '':
+        pod_user_client = PodUserClient(configure.data["appId"])
+    else:
+        pod_user_client = None
 
     # Now process CSV file
     # CSV file will have 2 columns - Email, Action, Permission (ADD / REMOVE)
