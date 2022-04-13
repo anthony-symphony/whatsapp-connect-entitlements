@@ -28,15 +28,15 @@ The user file name will be used to generate the list of all users who currently 
 The script expects an input CSV file at the top directory where the script runs with filename - ``user_entitlements.csv``
 
 The CSV file will contain following columns:
-- Email (Symphony User Email Address - will be used to lookup from Symphony Directory)
+- advisorSymphonyId (Advisor's Symphony User ID - will be used to lookup from Symphony Directory)
 - Action (Whether to add or remove user to the entitlement - values: ``ADD`` or ``REMOVE``)
 - Permissions (List of permissions to be added - separated by ``~``)
 
 Example input CSV file
 
-    Email,Action,Permissions
-    john.doe@symphony.com,ADD,create:room~create:contact
-    peter.smith@symphony.com,ADD,create:room~create:contact
+    advisorSymphonyId,Action,Permissions
+    351775001412105,ADD,create:room~create:contact
+    351775001412106,ADD,create:room~create:contact
 
 
 ## Output CSV Columns
@@ -100,9 +100,8 @@ You also need to update based on the service account created above:
 - privateKeyPath (ends with a trailing "/"))
 - privateKeyName
 - publicKeyId (please confirm this with Symphony team)
-- podId (please confirm this with Symphony team)
 - entitlementType (please set to either ``WHATSAPP`` or ``WECHAT`` or ``SMS``)
-- appId (please set to either ``wechat`` or ``com.symphony.sfs.admin-app`` for WhatsApp / SMS, leave blank if you wish to manage extension app manually)
+- appId (please set to ``com.symphony.sfs.admin-app`` , leave blank if you wish to manage extension app manually)
 
 
 Sample:
@@ -112,7 +111,6 @@ Sample:
       "privateKeyPath":"./rsa/",
       "privateKeyName": "privateKey.pem",
       "publicKeyId": "xxx",
-      "podId": "xxx",
       "entitlementType": "WECHAT",
       "appId": "wechat",
       "proxyURL": "",

@@ -25,7 +25,7 @@ def main():
         pod_user_client = None
 
     # Now process CSV file
-    # CSV file will have 2 columns - Email, Action, Permission (ADD / REMOVE)
+    # CSV file will have 2 columns - advisorSymphonyId, Action, Permission (ADD / REMOVE)
     process_result = []
     with open(INPUT_FILE, newline='') as csvfile:
         csv_list = csv.reader(csvfile, delimiter=',')
@@ -37,16 +37,16 @@ def main():
             # Ensure CSV has 3 columns
             if len(row) !=3 :
                 raise Exception(
-                    'Invalid CSV File Format - Expect 3 columns - Email, Action, Permissions')
+                    'Invalid CSV File Format - Expect 3 columns - advisorSymphonyId, Action, Permissions')
 
             # Skip header row
-            if row[0] == "Email":
+            if row[0] == "advisorSymphonyId":
                 continue
 
             result_record = dict()
             # Get row values
             result_record['result'] = ''
-            result_record['email'] = row[0].lower()
+            result_record['advisorSymphonyId'] = row[0].lower()
             result_record['ent_action'] = row[1].upper()
             result_record['permission'] = row[2]
 
@@ -56,18 +56,18 @@ def main():
                 process_result.append(result_record)
                 continue
 
-            # If Email is blank, then SKIP
-            if result_record['email'] is None or result_record['email'] == '':
-                result_record['result'] = f'ERROR - Email field is not populated - SKIPPED'
+            # If advisorSymphonyId is blank, then SKIP
+            if result_record['advisorSymphonyId'] is None or result_record['advisorSymphonyId'] == '':
+                result_record['result'] = f'ERROR - advisorSymphonyId field is not populated - SKIPPED'
                 process_result.append(result_record)
                 continue
 
 
             # Add User to Entitlement
             if result_record['ent_action'] == "ADD":
-                print(f"Adding {result_record['email']}")
+                print(f"Adding {result_record['advisorSymphonyId']}")
                 try:
-                    output = entitlement_client.add_entitlements(result_record['email'])
+                    output = entitlement_client.add_entitlements(result_record['advisorSymphonyId'])
                     if 'status' in output and 'title' in output:
                         result_record['result'] = f'{output["status"]} - {output["title"]} '
                     else:
@@ -86,7 +86,7 @@ def main():
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
-                    print(f" ##### ERROR WHILE ADDING ENTITLEMENT {result_record['email']} #####")
+                    print(f" ##### ERROR WHILE ADDING ENTITLEMENT {result_record['advisorSymphonyId']} #####")
                     print('Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
                     result_record['result'] = 'ERROR ADDING Entitlement - Check logs for details'
 
@@ -100,7 +100,7 @@ def main():
                         for p in permission_list:
                             print(f"Adding Permission - {p}")
                             try:
-                                output = entitlement_client.add_permission(result_record['email'], p)
+                                output = entitlement_client.add_permission(result_record['advisorSymphonyId'], p)
                                 if 'permission' in output:
                                     result_record['result'] += f'Permission {p} added successfully '
                                 elif 'status' in output and 'title' in output:
@@ -110,25 +110,25 @@ def main():
 
                             except Exception as ex:
                                 exInfo = sys.exc_info()
-                                print(f" ##### ERROR WHILE ADDING PERMISSION {p} for {result_record['email']} #####")
+                                print(f" ##### ERROR WHILE ADDING PERMISSION {p} for {result_record['advisorSymphonyId']} #####")
                                 print(
                                     'Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
                                 result_record['result'] += f'ERROR ADDING PERMISSION {p} - Check logs for details '
 
             # Remove User to Entitlement
             if result_record['ent_action'] == "REMOVE":
-                print(f"Removing Entitlement - {result_record['email']}")
+                print(f"Removing Entitlement - {result_record['advisorSymphonyId']}")
                 try:
                     # Get User ID
                     if configure.data["appId"] != '':
-                        output = entitlement_client.find_entitlement(result_record['email'])
+                        output = entitlement_client.find_entitlement(result_record['advisorSymphonyId'])
                         if 'advisorSymphonyId' in output:
                             user_id = output['advisorSymphonyId']
                         if 'symphonyId' in output:
                             user_id = output['symphonyId']
 
                     # Remove Entitlement
-                    output = entitlement_client.delete_entitlements(result_record['email'])
+                    output = entitlement_client.delete_entitlements(result_record['advisorSymphonyId'])
                     if 'status' in output and 'title' in output:
                         result_record['result'] = f'{output["status"]} - {output["title"]}'
                     else:
@@ -142,7 +142,7 @@ def main():
 
                 except Exception as ex:
                     exInfo = sys.exc_info()
-                    print(f" ##### ERROR WHILE REMOVING {result_record['email']} #####")
+                    print(f" ##### ERROR WHILE REMOVING {result_record['advisorSymphonyId']} #####")
                     print('Stack Trace: ' + ''.join(traceback.format_exception(exInfo[0], exInfo[1], exInfo[2])))
                     result_record['result'] = 'ERROR REMOVING Entitlement - Check logs for details'
 
@@ -185,7 +185,7 @@ def print_curent_user_list(process_result):
 
 def print_result(process_result):
     with open(OUTPUT_FILE, 'w', newline='', encoding='utf-8-sig') as csvfile:
-        fieldnames = ['Email',
+        fieldnames = ['advisorSymphonyId',
                       'Action',
                       'Permissions',
                       'Status']
@@ -194,7 +194,7 @@ def print_result(process_result):
         writer.writeheader()
         for row in process_result:
             writer.writerow(
-                {'Email': row['email'],
+                {'advisorSymphonyId': row['advisorSymphonyId'],
                  'Action': row['ent_action'],
                  'Permissions': row['permission'],
                  'Status': row['result']})
